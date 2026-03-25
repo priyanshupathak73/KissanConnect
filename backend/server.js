@@ -1,45 +1,28 @@
-const express = require("express")
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+require('dotenv').config();
 
-const app = express()
+const userRoutes = require('./routes/userRoutes');
+const productRoutes = require('./routes/productRoutes');
 
-app.use(express.json())
+const app = express();
 
-const products = []
-let currentId = 1
+// Middleware
+app.use(cors());
+app.use(express.json());
 
-app.get("/products", (req, res) => {
-  res.json(products)
-})
+// Routes
+app.use('/api/users', userRoutes);
+app.use('/api/products', productRoutes);
 
-app.post("/products", (req, res) => {
-  const product = {
-    id: currentId,
-    name: req.body.name,
-    price: req.body.price
-  }
+// Database Connection
+mongoose.connect('mongodb://localhost:27017/kissanconnect')
+  .then(() => console.log('MongoDB connected'))
+  .catch(err => console.error(err));
 
-  currentId++
-
-  products.push(product)
-
-  res.json({
-    message: "Product added",
-    data: product
-  })
-})
-
-app.get("/products/:id", (req, res) => {
-  const id = parseInt(req.params.id)
-
-  const product = products.find(p => p.id === id)
-
-  if (!product) {
-    return res.status(404).json({ message: "Product not found" })
-  }
-
-  res.json(product)
-})
-
-app.listen(5000, () => {
-  console.log("Server running on port 5000")
-})
+// Start Server
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
