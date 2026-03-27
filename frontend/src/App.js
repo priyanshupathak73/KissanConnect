@@ -4,6 +4,7 @@ import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Products from './pages/Products';
+import OrderPage from './pages/OrderPage';
 
 function App() {
   return (
@@ -15,9 +16,10 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/products" element={<Products />} />
+            <Route path="/order" element={<OrderPage />} />
           </Routes>
         </main>
-        <footer className="bg-secondary text-white text-center py-6 shadow-inner mt-10">
+        <footer className="bg-[#6D4C41] text-white text-center py-6 shadow-inner">
           <p className="font-bold opacity-80">© 2026 KissanConnect. Connecting Farmers & Buyers.</p>
         </footer>
       </div>
