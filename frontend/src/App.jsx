@@ -10,7 +10,7 @@ function App() {
   const [apiError, setApiError] = useState("")
 
   useEffect(() => {
-    fetch("http://localhost:5000/products")
+    fetch("http://localhost:5000/api/products")
       .then(res => {
         if (!res.ok) {
           throw new Error("Unable to load products")

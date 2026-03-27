@@ -2,6 +2,29 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 const ProductCard = ({ product }) => {
+  const handleBuy = async () => {
+    const buyerName = window.prompt("Enter your Name to place the order:");
+    if (!buyerName) return;
+    
+    const buyerPhone = window.prompt("Enter your Phone Number:");
+    if (!buyerPhone) return;
+
+    try {
+      const res = await fetch('http://localhost:5000/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId: product._id, buyerName, buyerPhone })
+      });
+      if (res.ok) {
+        alert('Order placed successfully! The farmer will contact you soon.');
+      } else {
+        alert('Failed to place order.');
+      }
+    } catch (err) {
+      alert('Error connecting to server.');
+    }
+  };
+
   return (
     <motion.div 
       whileHover={{ scale: 1.05, rotateY: 8, rotateX: -5, z: 50 }}
@@ -31,6 +54,7 @@ const ProductCard = ({ product }) => {
         <div className="flex justify-between items-center mt-4">
           <span className="text-3xl font-black text-secondary">₹{product.price}<span className="text-sm font-medium opacity-60">/kg</span></span>
           <motion.button 
+            onClick={handleBuy}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95, y: 4, boxShadow: "0px 0px 0px rgba(0,0,0,0)" }}
             className="bg-accent hover:bg-[#F4511E] text-white px-5 py-2.5 rounded-lg font-bold shadow-[0px_4px_0px_#D84315] hover:shadow-[0px_2px_0px_#D84315] hover:translate-y-[2px] transition-all"
