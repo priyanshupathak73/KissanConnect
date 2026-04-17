@@ -1,67 +1,129 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
-  const [isLogin, setIsLogin] = useState(true);
   const navigate = useNavigate();
+  const { login } = useAuth();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [role, setRole] = useState('user');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Simulate simple login
-    navigate('/products');
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setError('');
+
+    const normalizedEmail = email.trim().toLowerCase();
+    if (!normalizedEmail || !password.trim()) {
+      setError('Please enter your email and password.');
+      return;
+    }
+
+    setSubmitting(true);
+
+    try {
+      const user = await login(normalizedEmail, password);
+
+      if (user.role === 'farmer') {
+        navigate('/farmer-dashboard');
+      } else {
+        navigate('/marketplace');
+      }
+    } catch (err) {
+      const message = err.response?.data?.message || 'Unable to login right now.';
+      setError(message);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
-    <div className="container mx-auto px-4 py-12 flex justify-center">
-      <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-md border border-green-100">
-        <h2 className="text-3xl font-bold text-secondary mb-6 text-center">
-          {isLogin ? 'Welcome Back' : 'Create Account'}
-        </h2>
-        
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          {!isLogin && (
-            <div>
-              <label className="block text-gray-700 mb-1">Name</label>
-              <input type="text" required className="w-full px-4 py-2 border rounded focus:outline-none focus:border-secondary" placeholder="John Doe" />
-            </div>
-          )}
-          
-          <div>
-            <label className="block text-gray-700 mb-1">Email</label>
-            <input type="email" required className="w-full px-4 py-2 border rounded focus:outline-none focus:border-secondary" placeholder="john@example.com" />
+    <div className="bg-gradient-to-b from-green-50 via-white to-green-50 min-h-screen flex items-center justify-center px-4 py-10">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 border border-white/80">
+        <h1 className="text-3xl font-extrabold text-green-950 mb-1">Welcome back</h1>
+        <p className="text-green-900/60 text-sm mb-6">Sign in to continue with KissanConnect.</p>
+
+        <div className="grid grid-cols-2 gap-2 bg-green-50/60 p-1.5 rounded-xl mb-6">
+          <button
+            type="button"
+            onClick={() => setRole('user')}
+            className={`rounded-lg px-3 py-2 text-sm font-semibold transition-all duration-200 ${
+              role === 'user'
+                ? 'bg-white text-green-950 border border-green-600/40 shadow-sm'
+                : 'text-green-700/70 border border-transparent hover:bg-white/60'
+            }`}
+          >
+            Customer
+          </button>
+          <button
+            type="button"
+            onClick={() => setRole('farmer')}
+            className={`rounded-lg px-3 py-2 text-sm font-semibold transition-all duration-200 ${
+              role === 'farmer'
+                ? 'bg-white text-green-950 border border-emerald-600/50 shadow-sm'
+                : 'text-green-700/70 border border-transparent hover:bg-white/60'
+            }`}
+          >
+            Farmer
+          </button>
+        </div>
+
+        {error && (
+          <div className="mb-4 bg-red-50 text-red-500 text-sm font-medium px-4 py-2 rounded-lg">
+            {error}
           </div>
-          
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-gray-700 mb-1">Password</label>
-            <input type="password" required className="w-full px-4 py-2 border rounded focus:outline-none focus:border-secondary" placeholder="••••••••" />
+            <label htmlFor="email" className="block text-sm font-semibold text-green-950 mb-1.5">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-600/50 focus:border-green-600/40"
+              placeholder="you@example.com"
+              autoComplete="email"
+            />
           </div>
 
-          {!isLogin && (
-            <div>
-              <label className="block text-gray-700 mb-1">Role</label>
-              <select className="w-full px-4 py-2 border rounded focus:outline-none focus:border-secondary">
-                <option value="buyer">Buyer</option>
-                <option value="farmer">Farmer</option>
-              </select>
-            </div>
-          )}
+          <div>
+            <label htmlFor="password" className="block text-sm font-semibold text-green-950 mb-1.5">
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-600/50 focus:border-green-600/40"
+              placeholder="Enter your password"
+              autoComplete="current-password"
+            />
+          </div>
 
-          <button type="submit" className="bg-accent hover:bg-orange-600 text-white font-bold py-2 rounded mt-2 transition-colors">
-            {isLogin ? 'Login' : 'Register'}
+          <button
+            type="submit"
+            disabled={submitting}
+            className="w-full mt-2 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl transition-all duration-150 shadow-[0_8px_0_rgba(0,0,0,0.14)] hover:-translate-y-[1px] hover:scale-[1.01] hover:shadow-[0_10px_0_rgba(0,0,0,0.14)] active:translate-y-[2px] active:scale-[0.99] active:shadow-[0_3px_0_rgba(0,0,0,0.16)] disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {submitting ? 'Signing in...' : `Sign In as ${role === 'farmer' ? 'Farmer' : 'User'}`}
           </button>
         </form>
 
-        <div className="mt-6 text-center">
-          <p className="text-gray-600">
-            {isLogin ? "Don't have an account? " : "Already have an account? "}
-            <button 
-              onClick={() => setIsLogin(!isLogin)}
-              className="text-secondary font-semibold hover:underline"
-            >
-              {isLogin ? 'Register' : 'Login'}
-            </button>
-          </p>
-        </div>
+        <p className="text-sm text-green-700/70 text-center mt-6">
+          New to KissanConnect?{' '}
+          <Link to="/register" className="text-green-700 font-semibold hover:underline">
+            Create account
+          </Link>
+        </p>
       </div>
     </div>
   );

@@ -10,7 +10,7 @@ function AddProduct({ setProducts, setApiError }) {
 
     const product = { name, price }
 
-    fetch("http://localhost:5000/products", {
+    fetch("http://localhost:5000/api/products", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -25,7 +25,8 @@ function AddProduct({ setProducts, setApiError }) {
         return res.json()
       })
       .then(data => {
-        setProducts(prev => [...prev, data.data])
+        const createdProduct = data.product || data.data || data
+        setProducts(prev => [...prev, createdProduct])
         setApiError("")
         setName("")
         setPrice("")

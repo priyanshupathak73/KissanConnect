@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard - KissanConnect</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: linear-gradient(135deg, #F5E6D3 0%, #F0DCC8 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        /* Left Side - Orders */
+        .orders-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 24px;
+            letter-spacing: -0.3px;
+        }
+
+        .order-item {
+            padding: 24px;
+            border: 1px solid #F0E5D8;
+            border-radius: 12px;
+            background: #FAFAF8;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .order-id {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c2c2c;
+        }
+
+        .badge {
+            background: #FF6B35;
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .order-date {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+
+        .order-items {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding: 12px 0;
+            border-top: 1px solid #E5DDD0;
+            border-bottom: 1px solid #E5DDD0;
+        }
+
+        .product-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #FF6B35 0%, #FFB347 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .product-info {
+            flex: 1;
+        }
+
+        .product-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .order-total {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-top: 12px;
+        }
+
+        /* Right Side - Profile and Summary */
+        .right-section {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .profile-description {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+            text-transform: capitalize;
+            letter-spacing: 0.2px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid #E5DDD0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            background: white;
+            color: #1a1a1a;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #FF6B35;
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+        }
+
+        .form-group input::placeholder {
+            color: #9ca3af;
+        }
+
+        .form-group.error input {
+            border-color: #DC2626;
+            background: #FEF2F2;
+        }
+
+        .error-message {
+            color: #DC2626;
+            font-size: 12px;
+            margin-top: 6px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .input-icon {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            font-size: 16px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-group.optional label::after {
+            content: " (Optional)";
+            font-weight: 400;
+            color: #9ca3af;
+            font-size: 12px;
+            text-transform: lowercase;
+        }
+
+        .address-section {
+            background: #FAFAF8;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .address-icon {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 16px;
+        }
+
+        .save-button {
+            width: 100%;
+            padding: 14px 24px;
+            background: linear-gradient(135deg, #FF6B35 0%, #FF5722 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+            letter-spacing: 0.5px;
+            margin-top: 8px;
+        }
+
+        .save-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+        }
+
+        .save-button:active {
+            transform: translateY(0);
+        }
+
+        /* Summary Card */
+        .summary-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        }
+
+        .summary-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #F0E5D8;
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .summary-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .summary-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: #FF6B35;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Premium touches */
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 107, 53, 0.1), transparent);
+            border-radius: 16px 16px 0 0;
+        }
+
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 18px;
+            padding-right: 36px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="dashboard">
+            <!-- Left Side: Orders -->
+            <div class="orders-section">
+                <div class="card">
+                    <h2 class="section-title">Your Orders</h2>
+                    
+                    <div class="order-item">
+                        <div class="order-header">
+                            <div class="order-id">Order #D537B7</div>
+                            <span class="badge">Pending</span>
+                        </div>
+                        
+                        <div class="order-date">17 April 2026</div>
+                        
+                        <div class="order-items">
+                            <div class="product-icon">🥔</div>
+                            <div class="product-info">
+                                <div class="product-name">Aalu x 2</div>
+                            </div>
+                        </div>
+                        
+                        <div class="order-total">Total: ₹60</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side: Profile and Summary -->
+            <div class="right-section">
+                <!-- Profile Card -->
+                <div class="card">
+                    <h2 class="section-title">Profile</h2>
+                    <p class="profile-description">Manage contact details for delivery updates.</p>
+                    
+                    <!-- Full Name -->
+                    <div class="form-group">
+                        <label for="fullname">Full Name</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="fullname" value="jhgv" placeholder="Enter your full name">
+                        </div>
+                    </div>
+
+                    <!-- Mobile Number with Error -->
+                    <div class="form-group error">
+                        <label for="mobile">Mobile Number</label>
+                        <div class="input-wrapper">
+                            <input type="tel" id="mobile" value="9876543210" placeholder="10-digit mobile number">
+                        </div>
+                        <div class="error-message">
+                            <i class="fas fa-exclamation-circle"></i>
+                            Mobile number must be exactly 10 digits (no more, no less)
+                        </div>
+                    </div>
+
+                    <!-- Delivery Address Section -->
+                    <div class="address-section">
+                        <div class="address-icon">
+                            <i class="fas fa-map-pin"></i>
+                            Delivery Address
+                        </div>
+
+                        <!-- Address Line 1 -->
+                        <div class="form-group">
+                            <label for="address1">Address Line 1</label>
+                            <input type="text" id="address1" value="House No. 12, Building Name" placeholder="House No., Building Name">
+                        </div>
+
+                        <!-- Address Line 2 -->
+                        <div class="form-group optional">
+                            <label for="address2">Address Line 2</label>
+                            <input type="text" id="address2" value="Near Temple, Sector 5" placeholder="Near landmark (Optional)">
+                        </div>
+
+                        <!-- City and Pincode -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="city">City</label>
+                                <select id="city">
+                                    <option value="">Select City</option>
+                                    <option value="mumbai" selected>Mumbai</option>
+                                    <option value="delhi">Delhi</option>
+                                    <option value="bangalore">Bangalore</option>
+                                    <option value="pune">Pune</option>
+                                    <option value="hyderabad">Hyderabad</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="pincode">Pincode</label>
+                                <input type="text" id="pincode" value="400001" placeholder="400001">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Save Button -->
+                    <button class="save-button">
+                        <i class="fas fa-save"></i> Save Profile
+                    </button>
+                </div>
+
+                <!-- Summary Card -->
+                <div class="summary-card">
+                    <div class="summary-title">Summary</div>
+                    
+                    <div class="summary-item">
+                        <span class="summary-label">
+                            <i class="fas fa-shopping-bag"></i>
+                            Total Orders
+                        </span>
+                        <span class="summary-value">1</span>
+                    </div>
+                    
+                    <div class="summary-item">
+                        <span class="summary-label">
+                            <i class="fas fa-rupee-sign"></i>
+                            Total Spent
+                        </span>
+                        <span class="summary-value">₹60</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

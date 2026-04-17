@@ -15,16 +15,16 @@ const OrderPage = () => {
   // If no product was passed, redirect
   if (!product) {
     return (
-      <div className="min-h-screen bg-[#F5E6D3] flex items-center justify-center px-4">
+      <div className="min-h-screen bg-gradient-to-b from-green-50 via-white to-green-50 flex items-center justify-center px-4">
         <div className="bg-white rounded-2xl shadow-lg p-8 text-center max-w-md w-full">
           <span className="text-6xl block mb-4">🛒</span>
-          <h2 className="text-2xl font-bold text-[#6D4C41] mb-2">No Product Selected</h2>
-          <p className="text-[#6D4C41]/60 mb-6">
+          <h2 className="text-2xl font-bold text-green-950 mb-2">No Product Selected</h2>
+          <p className="text-green-900/60 mb-6">
             Please go back to the marketplace and select a product to buy.
           </p>
           <Link
             to="/products"
-            className="inline-block bg-[#FF7043] text-white px-6 py-3 rounded-xl font-bold hover:bg-[#F4511E] transition-colors"
+            className="inline-block bg-green-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-green-700 transition-colors"
           >
             Browse Products
           </Link>
@@ -65,26 +65,26 @@ const OrderPage = () => {
   // Success state
   if (orderPlaced) {
     return (
-      <div className="min-h-screen bg-[#F5E6D3] flex items-center justify-center px-4">
+      <div className="min-h-screen bg-gradient-to-b from-green-50 via-white to-green-50 flex items-center justify-center px-4">
         <div className="bg-white rounded-2xl shadow-lg p-8 text-center max-w-md w-full">
           <span className="text-6xl block mb-4">🎉</span>
-          <h2 className="text-2xl font-bold text-[#26A69A] mb-2">Order Placed!</h2>
-          <p className="text-[#6D4C41]/70 mb-2">
+          <h2 className="text-2xl font-bold text-emerald-600 mb-2">Order Placed!</h2>
+          <p className="text-green-900/70 mb-2">
             Your order for <strong>{product.name}</strong> has been placed successfully.
           </p>
-          <p className="text-[#6D4C41]/50 text-sm mb-6">
+          <p className="text-green-900/50 text-sm mb-6">
             The farmer will contact you soon at {buyerPhone}.
           </p>
           <div className="flex gap-3 justify-center">
             <Link
               to="/products"
-              className="bg-[#FF7043] text-white px-6 py-3 rounded-xl font-bold hover:bg-[#F4511E] transition-colors"
+              className="bg-green-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-green-700 transition-colors"
             >
               Continue Shopping
             </Link>
             <Link
               to="/"
-              className="bg-[#6D4C41] text-white px-6 py-3 rounded-xl font-bold hover:bg-[#5D3F37] transition-colors"
+              className="bg-green-900 text-white px-6 py-3 rounded-xl font-bold hover:bg-green-950 transition-colors"
             >
               Go Home
             </Link>
@@ -98,13 +98,13 @@ const OrderPage = () => {
   const imageSrc = product.image || `/images/${product.name?.toLowerCase().trim()}.png`;
 
   return (
-    <div className="min-h-screen bg-[#F5E6D3] py-10 px-4">
+    <div className="min-h-screen bg-gradient-to-b from-green-50 via-white to-green-50 py-10 px-4">
       <div className="container mx-auto max-w-4xl">
 
         {/* Back Button */}
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-[#6D4C41]/70 hover:text-[#6D4C41] font-medium mb-6 transition-colors"
+          className="kc-btn-press flex items-center gap-2 text-green-900/70 hover:text-green-950 font-medium mb-6 transition-colors px-3 py-1 rounded-md"
         >
           ← Back to Marketplace
         </button>
@@ -112,7 +112,7 @@ const OrderPage = () => {
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden md:flex">
           
           {/* Product Image Section */}
-          <div className="md:w-1/2 bg-[#FFF8F0] flex items-center justify-center p-10">
+          <div className="md:w-1/2 bg-green-50 flex items-center justify-center p-10">
             <img
               src={imageSrc}
               alt={product.name}
@@ -130,22 +130,22 @@ const OrderPage = () => {
           {/* Order Form Section */}
           <div className="md:w-1/2 p-8">
             {/* Fresh tag */}
-            <span className="inline-block bg-[#26A69A] text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-3">
+            <span className="inline-block bg-emerald-600 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-3">
               Fresh
             </span>
 
-            <h1 className="text-3xl font-extrabold text-[#6D4C41] mb-1">
+            <h1 className="text-3xl font-extrabold text-green-950 mb-1">
               {product.name}
             </h1>
 
-            <p className="text-[#6D4C41]/50 text-sm mb-4">
+            <p className="text-green-900/50 text-sm mb-4">
               {product.description || 'Farm-fresh produce delivered to your door.'}
             </p>
 
             {/* Price */}
             <div className="flex items-baseline gap-3 mb-6">
-              <span className="text-3xl font-black text-[#FF7043]">₹{product.price}</span>
-              <span className="text-sm text-[#6D4C41]/40">/kg</span>
+              <span className="text-3xl font-black text-green-600">₹{product.price}</span>
+              <span className="text-sm text-green-900/40">/kg</span>
               {product.oldPrice && (
                 <span className="text-lg text-red-400 line-through">₹{product.oldPrice}</span>
               )}
@@ -154,7 +154,7 @@ const OrderPage = () => {
             {/* Order Form */}
             <form onSubmit={handlePlaceOrder} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-[#6D4C41]/70 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-semibold text-green-900/70 uppercase tracking-wider mb-1.5">
                   Your Name
                 </label>
                 <input
@@ -163,12 +163,12 @@ const OrderPage = () => {
                   onChange={(e) => setBuyerName(e.target.value)}
                   placeholder="Enter your full name"
                   required
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm text-[#6D4C41] outline-none focus:ring-2 focus:ring-[#26A69A]/50 focus:border-[#26A69A] transition-all"
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm text-green-950 outline-none focus:ring-2 focus:ring-green-600/50 focus:border-green-600 transition-all"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#6D4C41]/70 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-semibold text-green-900/70 uppercase tracking-wider mb-1.5">
                   Phone Number
                 </label>
                 <input
@@ -177,27 +177,27 @@ const OrderPage = () => {
                   onChange={(e) => setBuyerPhone(e.target.value)}
                   placeholder="Enter your phone number"
                   required
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm text-[#6D4C41] outline-none focus:ring-2 focus:ring-[#26A69A]/50 focus:border-[#26A69A] transition-all"
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm text-green-950 outline-none focus:ring-2 focus:ring-green-600/50 focus:border-green-600 transition-all"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#6D4C41]/70 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-semibold text-green-900/70 uppercase tracking-wider mb-1.5">
                   Quantity (Kg)
                 </label>
                 <div className="flex items-center gap-3">
                   <button
                     type="button"
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="w-10 h-10 rounded-lg bg-gray-100 text-[#6D4C41] font-bold hover:bg-gray-200 transition-colors"
+                    className="w-10 h-10 rounded-lg bg-gray-100 text-green-950 font-bold hover:bg-gray-200 transition-colors"
                   >
                     −
                   </button>
-                  <span className="text-xl font-bold text-[#6D4C41] w-8 text-center">{quantity}</span>
+                  <span className="text-xl font-bold text-green-950 w-8 text-center">{quantity}</span>
                   <button
                     type="button"
                     onClick={() => setQuantity(quantity + 1)}
-                    className="w-10 h-10 rounded-lg bg-gray-100 text-[#6D4C41] font-bold hover:bg-gray-200 transition-colors"
+                    className="w-10 h-10 rounded-lg bg-gray-100 text-green-950 font-bold hover:bg-gray-200 transition-colors"
                   >
                     +
                   </button>
@@ -205,15 +205,15 @@ const OrderPage = () => {
               </div>
 
               {/* Total */}
-              <div className="bg-[#F5E6D3]/50 rounded-lg p-4 flex justify-between items-center">
-                <span className="text-sm font-semibold text-[#6D4C41]/70">Total Amount</span>
-                <span className="text-2xl font-black text-[#6D4C41]">₹{totalPrice}</span>
+              <div className="bg-green-50/50 rounded-lg p-4 flex justify-between items-center">
+                <span className="text-sm font-semibold text-green-900/70">Total Amount</span>
+                <span className="text-2xl font-black text-green-950">₹{totalPrice}</span>
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#FF7043] hover:bg-[#F4511E] text-white py-3.5 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl active:translate-y-[1px] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-green-600 hover:bg-green-700 text-white py-3.5 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl active:translate-y-[1px] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Placing Order...' : '🛒 Place Order'}
               </button>
