@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { orderApi } from '../services/api';
+import { orderService } from '../services/api';
 
 const CART_FALLBACK_IMAGE =
   'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><rect width="64" height="64" fill="%23FFF8F0"/><circle cx="32" cy="26" r="10" fill="%23E7D8C7"/><rect x="16" y="44" width="32" height="6" rx="3" fill="%23D9C5B0"/></svg>';
@@ -30,7 +30,7 @@ const CartPage = () => {
     setError('');
 
     try {
-      await orderApi.createOrder({
+      await orderService.create({
         userId: user._id,
         buyerName,
         buyerPhone,

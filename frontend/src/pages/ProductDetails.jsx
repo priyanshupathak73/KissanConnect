@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { productApi } from '../services/api';
+import { productService } from '../services/api';
 import { useCart } from '../context/CartContext';
 
 const FALLBACK_IMAGE =
@@ -20,8 +20,8 @@ const ProductDetails = () => {
       setLoading(true);
       setError('');
       try {
-        const response = await productApi.getProductById(id);
-        setProduct(response.data);
+        const data = await productService.getById(id);
+        setProduct(data);
       } catch (err) {
         setError('Unable to load product details.');
       } finally {

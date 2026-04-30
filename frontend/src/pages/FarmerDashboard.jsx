@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { orderApi, productApi } from '../services/api';
+import { orderService, productService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 const FarmerDashboard = () => {
@@ -10,16 +10,19 @@ const FarmerDashboard = () => {
   useEffect(() => {
     const loadDashboard = async () => {
       try {
-        const [productRes, orderRes, earningRes] = await Promise.all([
-          productApi.getProducts({ farmerId: user._id }),
-          orderApi.getOrders({ farmerId: user._id }),
-          orderApi.getFarmerEarnings(user._id),
+        const [productsData, orderData, earningRes] = await Promise.all([
+          productService.getAll({ farmerId: user._id }),
+          orderService.list({ farmerId: user._id }),
+          orderService.getFarmerEarnings(user._id),
         ]);
 
+        const products = Array.isArray(productsData) ? productsData : (productsData?.products || []);
+        const orders = Array.isArray(orderData) ? orderData : (orderData?.orders || []);
+
         setStats({
-          products: productRes.data.length,
-          orders: orderRes.data.length,
-          earnings: earningRes.data.totalEarnings || 0,
+          products: products.length,
+          orders: orders.length,
+          earnings: earningRes?.totalEarnings || 0,
         });
       } catch (error) {
         setStats({ products: 0, orders: 0, earnings: 0 });

@@ -7,7 +7,6 @@ const Login = () => {
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('user');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -44,31 +43,6 @@ const Login = () => {
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 border border-white/80">
         <h1 className="text-3xl font-extrabold text-green-950 mb-1">Welcome back</h1>
         <p className="text-green-900/60 text-sm mb-6">Sign in to continue with KissanConnect.</p>
-
-        <div className="grid grid-cols-2 gap-2 bg-green-50/60 p-1.5 rounded-xl mb-6">
-          <button
-            type="button"
-            onClick={() => setRole('user')}
-            className={`rounded-lg px-3 py-2 text-sm font-semibold transition-all duration-200 ${
-              role === 'user'
-                ? 'bg-white text-green-950 border border-green-600/40 shadow-sm'
-                : 'text-green-700/70 border border-transparent hover:bg-white/60'
-            }`}
-          >
-            Customer
-          </button>
-          <button
-            type="button"
-            onClick={() => setRole('farmer')}
-            className={`rounded-lg px-3 py-2 text-sm font-semibold transition-all duration-200 ${
-              role === 'farmer'
-                ? 'bg-white text-green-950 border border-emerald-600/50 shadow-sm'
-                : 'text-green-700/70 border border-transparent hover:bg-white/60'
-            }`}
-          >
-            Farmer
-          </button>
-        </div>
 
         {error && (
           <div className="mb-4 bg-red-50 text-red-500 text-sm font-medium px-4 py-2 rounded-lg">
@@ -114,7 +88,7 @@ const Login = () => {
             disabled={submitting}
             className="w-full mt-2 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl transition-all duration-150 shadow-[0_8px_0_rgba(0,0,0,0.14)] hover:-translate-y-[1px] hover:scale-[1.01] hover:shadow-[0_10px_0_rgba(0,0,0,0.14)] active:translate-y-[2px] active:scale-[0.99] active:shadow-[0_3px_0_rgba(0,0,0,0.16)] disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            {submitting ? 'Signing in...' : `Sign In as ${role === 'farmer' ? 'Farmer' : 'User'}`}
+            {submitting ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
 

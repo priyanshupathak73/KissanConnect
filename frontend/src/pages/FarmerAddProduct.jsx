@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { productApi } from '../services/api';
+import { productService } from '../services/api';
 
 const categories = ['Vegetables', 'Fruits', 'Grains', 'Spices', 'Dairy', 'Organic'];
 
@@ -49,7 +49,7 @@ const FarmerAddProduct = () => {
         formData.append('image', imageFile);
       }
 
-      await productApi.createProduct(formData);
+      await productService.create(formData);
       setSuccess('Product added successfully.');
       setTimeout(() => navigate('/farmer/products/manage'), 700);
     } catch (err) {

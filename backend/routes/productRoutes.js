@@ -30,6 +30,13 @@ const upload = multer({
     }
 });
 
+const isFarmer = (user) => user?.role === 'farmer';
+
+const parsePositiveNumber = (value, fallback = 0) => {
+    const parsedValue = Number(value);
+    return Number.isFinite(parsedValue) && parsedValue >= 0 ? parsedValue : fallback;
+};
+
 const withFullImageUrl = (productDoc) => {
     const product = productDoc.toObject ? productDoc.toObject() : productDoc;
     if (!product?.image) return product;
@@ -42,8 +49,8 @@ const withFullImageUrl = (productDoc) => {
     };
 };
 
-// Get all products - Protected route
-router.get('/', verifyToken, async (req, res) => {
+// Get all products
+router.get('/', async (req, res) => {
     try {
         const { farmerId, category, search } = req.query;
         const filters = {};
@@ -61,8 +68,8 @@ router.get('/', verifyToken, async (req, res) => {
     }
 });
 
-// Get product by ID - Protected route
-router.get('/:id', verifyToken, async (req, res) => {
+// Get product by ID
+router.get('/:id', async (req, res) => {
     try {
         const product = await Product.findById(req.params.id).populate('farmerId', 'name phone');
         if (!product) {
@@ -77,7 +84,7 @@ router.get('/:id', verifyToken, async (req, res) => {
 // Add a product
 router.post('/', verifyToken, upload.single('image'), async (req, res) => {
     try {
-        if (req.user.role !== 'farmer') {
+        if (!isFarmer(req.user)) {
             return res.status(403).json({ message: 'Only farmers can add products' });
         }
 
@@ -89,13 +96,13 @@ router.post('/', verifyToken, upload.single('image'), async (req, res) => {
         }
 
         const newProduct = new Product({
-            name,
+            name: String(name).trim(),
             description,
-            price: Number(price),
+            price: parsePositiveNumber(price),
             farmerId: req.user.id,
             category,
             image,
-            stock: stock !== undefined ? Number(stock) : 0
+            stock: parsePositiveNumber(stock)
         });
         await newProduct.save();
         res.status(201).json({ message: 'Product added successfully', product: withFullImageUrl(newProduct) });
@@ -106,7 +113,7 @@ router.post('/', verifyToken, upload.single('image'), async (req, res) => {
 
 router.put('/:id', verifyToken, async (req, res) => {
     try {
-        if (req.user.role !== 'farmer') {
+        if (!isFarmer(req.user)) {
             return res.status(403).json({ message: 'Only farmers can update products' });
         }
 
@@ -116,7 +123,14 @@ router.put('/:id', verifyToken, async (req, res) => {
             : image;
         const updatedProduct = await Product.findByIdAndUpdate(
             req.params.id,
-            { name, description, price, category, image: normalizedImage, stock },
+            {
+                name: name ? String(name).trim() : name,
+                description,
+                price: price !== undefined ? parsePositiveNumber(price) : price,
+                category,
+                image: normalizedImage,
+                stock: stock !== undefined ? parsePositiveNumber(stock) : stock
+            },
             { new: true, runValidators: true }
         );
 
@@ -133,7 +147,7 @@ router.put('/:id', verifyToken, async (req, res) => {
 // Delete a product
 router.delete('/:id', verifyToken, async (req, res) => {
     try {
-        if (req.user.role !== 'farmer') {
+        if (!isFarmer(req.user)) {
             return res.status(403).json({ message: 'Only farmers can delete products' });
         }
 

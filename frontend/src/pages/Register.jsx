@@ -80,7 +80,7 @@ const Register = () => {
                 : 'text-green-700/70 border border-transparent hover:bg-white/60'
             }`}
           >
-            Customstomer
+            Customer
           </button>
           <button
             type="button"

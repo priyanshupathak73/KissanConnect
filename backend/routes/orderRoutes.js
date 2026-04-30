@@ -4,51 +4,58 @@ const Product = require('../models/Product');
 const { verifyToken } = require('../middleware/authMiddleware');
 const router = express.Router();
 
+const VALID_STATUSES = ['Pending', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled'];
+
+const buildFarmerOrderView = (orderDoc, farmerId) => {
+    const order = orderDoc.toObject();
+    const farmerItems = order.items.filter((item) => item.farmerId?.toString() === farmerId);
+
+    if (!farmerItems.length) {
+        return null;
+    }
+
+    const farmerEarning = farmerItems.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
+
+    return {
+        ...order,
+        items: farmerItems,
+        farmerEarning
+    };
+};
+
 // Get all orders
 router.get('/', verifyToken, async (req, res) => {
     try {
         const { userId, farmerId } = req.query;
-        
-        // Users can only see their own orders
+
+        if (farmerId) {
+            if (req.user.role !== 'farmer' && req.user.role !== 'admin') {
+                return res.status(403).json({ message: 'Unauthorized' });
+            }
+
+            if (req.user.role === 'farmer' && req.user.id !== farmerId) {
+                return res.status(403).json({ message: 'Can only view your own farmer orders' });
+            }
+
+            const farmerOrders = await Order.find({ 'items.farmerId': farmerId })
+                .sort({ createdAt: -1 })
+                .populate('userId', 'name email')
+                .populate('items.productId', 'name price');
+
+            return res.status(200).json(
+                farmerOrders.map((order) => buildFarmerOrderView(order, farmerId)).filter(Boolean)
+            );
+        }
+
         const effectiveUserId = userId || req.user.id;
-        if (!userId && req.user.role === 'user') {
-            // Regular users can only see their own orders
-        } else if (userId && userId !== req.user.id && req.user.role !== 'farmer') {
-            // Only allow if it's their own ID or they're a farmer
+        if (userId && userId !== req.user.id && req.user.role !== 'farmer' && req.user.role !== 'admin') {
             return res.status(403).json({ message: 'Unauthorized' });
         }
 
-        const query = {};
-        if (effectiveUserId) query.userId = effectiveUserId;
-
-        const orders = await Order.find(query)
+        const orders = await Order.find({ userId: effectiveUserId })
             .sort({ createdAt: -1 })
             .populate('userId', 'name email')
             .populate('items.productId', 'name price');
-
-        if (farmerId) {
-            const farmerOrders = orders
-                .map((order) => {
-                    const farmerItems = order.items.filter(
-                        (item) => item.farmerId && item.farmerId.toString() === farmerId
-                    );
-                    if (!farmerItems.length) return null;
-
-                    const earningFromOrder = farmerItems.reduce(
-                        (sum, item) => sum + item.unitPrice * item.quantity,
-                        0
-                    );
-
-                    return {
-                        ...order.toObject(),
-                        items: farmerItems,
-                        farmerEarning: earningFromOrder
-                    };
-                })
-                .filter(Boolean);
-
-            return res.status(200).json(farmerOrders);
-        }
 
         res.status(200).json(orders);
     } catch (error) {
@@ -119,13 +126,17 @@ router.patch('/:id/status', verifyToken, async (req, res) => {
             return res.status(403).json({ message: 'Only farmers can update order status' });
         }
 
+        if (!VALID_STATUSES.includes(status)) {
+            return res.status(400).json({ message: 'Invalid order status' });
+        }
+
         const order = await Order.findById(req.params.id);
         if (!order) {
             return res.status(404).json({ message: 'Order not found' });
         }
 
         // Verify farmer owns items in this order
-        const farmerItems = order.items.filter(item => item.farmerId.toString() === req.user.id);
+        const farmerItems = order.items.filter((item) => item.farmerId.toString() === req.user.id);
         if (!farmerItems.length) {
             return res.status(403).json({ message: 'Unauthorized to update this order' });
         }

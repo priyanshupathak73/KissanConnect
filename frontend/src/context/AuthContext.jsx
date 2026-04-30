@@ -1,71 +1,114 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { authApi } from '../services/api';
+import { authService } from '../services/api';
 
+// Provides authentication state and actions to the app.
 const AuthContext = createContext(null);
 
-const AUTH_STORAGE_KEY = 'kissanconnect_auth';
+const AUTH_STORAGE_KEY = 'kissanconnect_user';
 const TOKEN_STORAGE_KEY = 'kissanconnect_token';
 
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const persisted = localStorage.getItem(AUTH_STORAGE_KEY);
-    const token = localStorage.getItem(TOKEN_STORAGE_KEY);
-    if (persisted) {
-      try {
-        const parsed = JSON.parse(persisted);
-        if (token) {
-          setUser(parsed);
-        } else {
-          localStorage.removeItem(AUTH_STORAGE_KEY);
-        }
-      } catch (error) {
-        localStorage.removeItem(AUTH_STORAGE_KEY);
-        localStorage.removeItem(TOKEN_STORAGE_KEY);
-      }
-    }
-    setLoading(false);
-  }, []);
-
-  const persistAuth = useCallback((nextUser, token) => {
-    setUser(nextUser);
-    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(nextUser));
-    localStorage.setItem(TOKEN_STORAGE_KEY, token);
-  }, []);
-
-  const login = useCallback(async (email, password) => {
-    const response = await authApi.login({ email, password });
-    persistAuth(response.data.user, response.data.token);
-    return response.data.user;
-  }, [persistAuth]);
-
-  const register = useCallback(async (payload) => {
-    const response = await authApi.register(payload);
-    persistAuth(response.data.user, response.data.token);
-    return response.data.user;
-  }, [persistAuth]);
-
-  const refreshProfile = useCallback(async () => {
-    if (!user?._id) return null;
-    const response = await authApi.getProfile(user._id);
-    setUser(response.data);
-    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(response.data));
-    return response.data;
-  }, [user]);
-
-  const updateProfile = useCallback(async (payload) => {
-    const response = await authApi.updateProfile(user._id, payload);
-    setUser(response.data.user);
-    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(response.data.user));
-    return response.data.user;
-  }, [user]);
-
-  const logout = useCallback(() => {
-    setUser(null);
+// Safely read stored auth (user object) from localStorage.
+const readStoredUser = () => {
+  try {
+    const raw = localStorage.getItem(AUTH_STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (err) {
     localStorage.removeItem(AUTH_STORAGE_KEY);
     localStorage.removeItem(TOKEN_STORAGE_KEY);
+    return null;
+  }
+};
+
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(() => readStoredUser());
+  const [loading, setLoading] = useState(false);
+
+  // Persist auth state (user + token) to localStorage and context.
+  const persistAuth = useCallback((nextUser, token) => {
+    try {
+      if (nextUser) localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(nextUser));
+      if (token) localStorage.setItem(TOKEN_STORAGE_KEY, token);
+      setUser(nextUser || null);
+    } catch (err) {
+      // Store errors shouldn't block UI; log for debugging.
+      // eslint-disable-next-line no-console
+      console.error('persistAuth error', err);
+    }
+  }, []);
+
+  // Attempt to login with credentials. Returns the user on success.
+  const login = useCallback(async (email, password) => {
+    setLoading(true);
+    try {
+      const data = await authService.login({ email, password });
+      persistAuth(data.user, data.token);
+      setLoading(false);
+      return data.user;
+    } catch (err) {
+      setLoading(false);
+      throw err;
+    }
+  }, [persistAuth]);
+
+  // Register a new account and persist returned credentials.
+  const register = useCallback(async (payload) => {
+    setLoading(true);
+    try {
+      const data = await authService.register(payload);
+      persistAuth(data.user, data.token);
+      setLoading(false);
+      return data.user;
+    } catch (err) {
+      setLoading(false);
+      throw err;
+    }
+  }, [persistAuth]);
+
+  // Refresh the current user's profile from the server.
+  const refreshProfile = useCallback(async () => {
+    if (!user?._id) return null;
+    setLoading(true);
+    try {
+      const data = await authService.getProfile(user._id);
+      // server may return user object directly
+      const latest = data.user || data;
+      setUser(latest);
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(latest));
+      setLoading(false);
+      return latest;
+    } catch (err) {
+      setLoading(false);
+      throw err;
+    }
+  }, [user]);
+
+  // Update profile server-side and refresh local state.
+  const updateProfile = useCallback(async (payload) => {
+    if (!user?._id) throw new Error('No authenticated user');
+    setLoading(true);
+    try {
+      const data = await authService.updateProfile(user._id, payload);
+      const updated = data.user || data;
+      setUser(updated);
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(updated));
+      setLoading(false);
+      return updated;
+    } catch (err) {
+      setLoading(false);
+      throw err;
+    }
+  }, [user]);
+
+  // Clear auth state and storage.
+  const logout = useCallback(() => {
+    try {
+      localStorage.removeItem(AUTH_STORAGE_KEY);
+      localStorage.removeItem(TOKEN_STORAGE_KEY);
+    } catch (err) {
+      // ignore storage errors
+    }
+    setUser(null);
   }, []);
 
   const value = useMemo(
@@ -87,8 +130,6 @@ export const AuthProvider = ({ children }) => {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within AuthProvider');
-  }
+  if (!context) throw new Error('useAuth must be used within AuthProvider');
   return context;
 };

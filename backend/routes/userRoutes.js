@@ -5,10 +5,25 @@ const User = require('../models/User');
 const { verifyToken } = require('../middleware/authMiddleware');
 const router = express.Router();
 
+const buildSafeUser = (userDoc) => ({
+    _id: userDoc._id,
+    name: userDoc.name,
+    email: userDoc.email,
+    role: userDoc.role,
+    businessName: userDoc.businessName,
+    phone: userDoc.phone,
+    address: userDoc.address,
+    addressLine1: userDoc.addressLine1,
+    addressLine2: userDoc.addressLine2,
+    city: userDoc.city,
+    state: userDoc.state,
+    pincode: userDoc.pincode
+});
+
 // Register a new user
 router.post('/register', async (req, res) => {
     try {
-        const { name, email, password, role, phone, address } = req.body;
+        const { name, email, password, role, businessName, phone, address } = req.body;
         if (!name || !email || !password) {
             return res.status(400).json({ message: 'All fields are required' });
         }
@@ -32,10 +47,11 @@ router.post('/register', async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new User({
-            name,
+            name: String(name).trim(),
             email: trimmedEmail,
             password: hashedPassword,
             role: normalizedRole,
+            businessName: normalizedRole === 'farmer' ? String(businessName || '').trim() : undefined,
             phone,
             address
         });
@@ -50,20 +66,11 @@ router.post('/register', async (req, res) => {
             expiresIn: '7d'
         });
 
-        const safeUser = {
-            _id: newUser._id,
-            name: newUser.name,
-            email: newUser.email,
-            role: newUser.role,
-            phone: newUser.phone,
-            address: newUser.address
-        };
-        
         res.status(201).json({
             message: 'User registered successfully',
             token,
-            role: safeUser.role,
-            user: safeUser
+            role: newUser.role,
+            user: buildSafeUser(newUser)
         });
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -95,20 +102,11 @@ router.post('/login', async (req, res) => {
             expiresIn: '7d'
         });
 
-        const safeUser = {
-            _id: user._id,
-            name: user.name,
-            email: user.email,
-            role: user.role,
-            phone: user.phone,
-            address: user.address
-        };
-        
         res.status(200).json({
             message: 'Login successful',
             token,
-            role: safeUser.role,
-            user: safeUser
+            role: user.role,
+            user: buildSafeUser(user)
         });
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -163,7 +161,7 @@ router.put('/:id', verifyToken, async (req, res) => {
 // Update profile endpoint
 router.post('/profile/update', verifyToken, async (req, res) => {
     try {
-        const { name, phone, addressLine1, addressLine2, city, state, pincode } = req.body;
+        const { name, phone, addressLine1, addressLine2, city, state, pincode, businessName } = req.body;
         const userId = req.user.id;
 
         // Validation
@@ -181,7 +179,7 @@ router.post('/profile/update', verifyToken, async (req, res) => {
 
         const updatedUser = await User.findByIdAndUpdate(
             userId,
-            { name, phone, addressLine1, addressLine2, city, state, pincode },
+            { name, phone, addressLine1, addressLine2, city, state, pincode, businessName },
             { new: true, runValidators: true }
         ).select('-password');
 

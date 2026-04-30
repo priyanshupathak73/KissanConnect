@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import CategoryBar from '../components/CategoryBar';
-import { productApi } from '../services/api';
+import { productService } from '../services/api';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 
@@ -118,10 +118,9 @@ const Home = () => {
       setLoading(true);
       setError(null);
       try {
-        // Fetch products from backend
-        const response = await productApi.getProducts();
-        // Limit to first 4 products for featured section
-        const products = Array.isArray(response.data) ? response.data : [];
+        // Fetch products from backend (productService.getAll returns data payload)
+        const data = await productService.getAll();
+        const products = Array.isArray(data) ? data : (data?.products || []);
         setFeaturedProducts(products.slice(0, 4));
       } catch (error) {
         if (error.response?.status === 401) {
@@ -328,8 +327,8 @@ const Home = () => {
               {[...Array(4)].map((_, i) => (
                 <div key={i} className="h-64 bg-gray-200 rounded-2xl animate-pulse"></div>
               ))}
-          </div>
-        ) : featuredProducts.length === 0 ? (
+            </div>
+          ) : featuredProducts.length === 0 ? (
           <div className="text-center py-20">
             <span className="text-6xl block mb-4">🌾</span>
             <p className="text-gray-700 text-lg font-semibold">No products available yet.</p>

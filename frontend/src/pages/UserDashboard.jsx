@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { orderApi } from '../services/api';
-import api from '../services/api';
+import { orderService, authService } from '../services/api';
 
 const UserDashboard = () => {
   const { user } = useAuth();
@@ -51,8 +50,8 @@ const UserDashboard = () => {
         });
 
         // Fetch user orders
-        const ordersResponse = await orderApi.getOrders({ userId: user._id });
-        setOrders(ordersResponse.data);
+        const ordersData = await orderService.list({ userId: user._id });
+        setOrders(Array.isArray(ordersData) ? ordersData : (ordersData?.orders || []));
       } catch (error) {
         console.error('Error fetching data:', error);
         setErrorMessage('Failed to load dashboard data');
@@ -87,9 +86,9 @@ const UserDashboard = () => {
         setPincodeLoading(true);
         setPincodeError('');
 
-        // Call external API to get location data
+        // Call external API to get location data (using http to avoid SSL issues)
         const response = await fetch(
-          `https://api.postalpincode.in/pincode/${pincodeDigits}`
+          `http://api.postalpincode.in/pincode/${pincodeDigits}`
         );
         
         if (!response.ok) {
@@ -211,7 +210,7 @@ const UserDashboard = () => {
       setSuccessMessage('');
       setErrorMessage('');
 
-      await api.post('/users/profile/update', formData);
+      await authService.updateProfile(user._id, formData);
       
       setSuccessMessage('Profile updated successfully!');
       
@@ -276,7 +275,7 @@ const UserDashboard = () => {
               ) : (
                 <div className="space-y-4">
                   {orders.map((order) => (
-                    <div key={order._id} className="p-4 border border-green-100 rounded-xl bg-green-50 hover:bg-green-100 transition-colors\">
+                    <div key={order._id} className="p-4 border border-green-100 rounded-xl bg-green-50 hover:bg-green-100 transition-colors">
                       <div className="flex justify-between items-start mb-3">
                         <div>
                           <p className="font-semibold text-gray-900">Order #{order._id.slice(-6).toUpperCase()}</p>

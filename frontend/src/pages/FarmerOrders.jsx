@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { orderApi } from '../services/api';
+import { orderService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 const FarmerOrders = () => {
@@ -9,13 +9,13 @@ const FarmerOrders = () => {
 
   const loadOrders = useCallback(async () => {
     if (!user?._id) return;
-    const [ordersResponse, earningsResponse] = await Promise.all([
-      orderApi.getOrders({ farmerId: user._id }),
-      orderApi.getFarmerEarnings(user._id),
+    const [ordersData, earningsData] = await Promise.all([
+      orderService.list({ farmerId: user._id }),
+      orderService.getFarmerEarnings(user._id),
     ]);
 
-    setOrders(ordersResponse.data);
-    setEarnings(earningsResponse.data.totalEarnings || 0);
+    setOrders(Array.isArray(ordersData) ? ordersData : (ordersData?.orders || []));
+    setEarnings(earningsData?.totalEarnings || 0);
   }, [user]);
 
   useEffect(() => {
@@ -28,7 +28,7 @@ const FarmerOrders = () => {
   );
 
   const updateStatus = async (orderId, status) => {
-    await orderApi.updateOrderStatus(orderId, { status });
+    await orderService.updateStatus(orderId, { status });
     await loadOrders();
   };
 

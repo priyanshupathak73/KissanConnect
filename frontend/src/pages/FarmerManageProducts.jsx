@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { productApi } from '../services/api';
+import { productService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 const FarmerManageProducts = () => {
@@ -10,8 +10,8 @@ const FarmerManageProducts = () => {
 
   const fetchProducts = useCallback(async () => {
     if (!user?._id) return;
-    const response = await productApi.getProducts({ farmerId: user._id });
-    setProducts(response.data);
+    const data = await productService.getAll({ farmerId: user._id });
+    setProducts(Array.isArray(data) ? data : (data?.products || []));
   }, [user]);
 
   useEffect(() => {
@@ -30,7 +30,7 @@ const FarmerManageProducts = () => {
   };
 
   const saveEdit = async (id) => {
-    await productApi.updateProduct(id, {
+    await productService.update(id, {
       ...form,
       price: Number(form.price),
       stock: Number(form.stock),
@@ -40,7 +40,7 @@ const FarmerManageProducts = () => {
   };
 
   const deleteProduct = async (id) => {
-    await productApi.deleteProduct(id);
+    await productService.remove(id);
     await fetchProducts();
   };
 

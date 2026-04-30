@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import CategoryBar from '../components/CategoryBar';
-import { productApi } from '../services/api';
+import { productService } from '../services/api';
 import { useCart } from '../context/CartContext';
 
 const Products = () => {
@@ -24,8 +24,8 @@ const Products = () => {
         if (activeCategory) params.category = activeCategory;
         if (searchQuery) params.search = searchQuery;
         
-        const response = await productApi.getProducts(params);
-        setProducts(response.data);
+        const data = await productService.getAll(params);
+        setProducts(Array.isArray(data) ? data : (data?.products || []));
       } catch (error) {
         if (error.response?.status === 401) {
           setError('Please log in to view products');
