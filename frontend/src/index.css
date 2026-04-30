@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
 body {
   margin: 0;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -9,11 +11,34 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: theme('colors.primary'); /* Light beige 60% rule */
-  color: theme('colors.secondary'); /* Earth brown */
+  background-color: #f0fdf4;
+  color: #166534;
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+/* Hide scrollbar for category bar */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@layer components {
+  .kc-btn {
+    @apply transition-all duration-150 ease-out hover:scale-[1.03] active:scale-[0.98] active:translate-y-[2px];
+  }
+
+  .kc-btn-3d {
+    @apply shadow-[0_8px_0_rgba(0,0,0,0.14)] hover:shadow-[0_10px_0_rgba(0,0,0,0.14)] active:shadow-[0_3px_0_rgba(0,0,0,0.16)];
+  }
+
+  .kc-btn-press {
+    @apply transition-all duration-150 ease-out shadow-[0_6px_0_rgb(5_150_105_/_0.28)] hover:translate-y-1 hover:shadow-[0_3px_0_rgb(5_150_105_/_0.24)] active:translate-y-2 active:shadow-none;
+  }
 }
